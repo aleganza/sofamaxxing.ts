@@ -2,7 +2,7 @@
   "name": "sofamaxxing.ts",
   "version": "1.0.0",
   "description": "Scraper for sofamaxxing",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "test": "jest"
