@@ -1,5 +1,5 @@
 {
-  "name": "sofamaxxing-scraper",
+  "name": "sofamaxxing.ts",
   "version": "1.0.0",
   "description": "Scraper for sofamaxxing",
   "main": "src/index.ts",
@@ -11,8 +11,7 @@
     "@consumet/extensions": "github:consumet/consumet.ts",
     "axios": "^1.7.9",
     "react-native-cheerio": "^1.0.0-rc.4",
-    "scraper": "file:",
-    "sofamaxxing-scraper": "file:"
+    "sofamaxxing.ts": "file:"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
