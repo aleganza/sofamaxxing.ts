@@ -7,6 +7,9 @@
     "build": "tsc",
     "test": "jest"
   },
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@consumet/extensions": "github:consumet/consumet.ts",
     "axios": "^1.7.9",
