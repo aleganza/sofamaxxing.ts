@@ -85,10 +85,6 @@ class AnimeParadise extends Provider {
       const episode = JSON.parse($("#__NEXT_DATA__").html().toString()).props
         .pageProps.episode;
 
-      console.log(`${this.baseUrl}/watch/${id}`);
-      console.log($);
-      console.log("gay");
-
       const episodeSources: Sources = {
         sources: [
           {

@@ -121,6 +121,7 @@ class AniPlay extends provider_1.default {
                         quality: el.quality,
                         isM3U8: true,
                     })),
+                    subtitles: []
                 };
                 (_b = data.subtitles) === null || _b === void 0 ? void 0 : _b.map((el) => {
                     var _a;

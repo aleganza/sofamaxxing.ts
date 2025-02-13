@@ -84,9 +84,6 @@ class AnimeParadise extends provider_1.default {
                 const $ = cheerio.load(res.data);
                 const episode = JSON.parse($("#__NEXT_DATA__").html().toString()).props
                     .pageProps.episode;
-                console.log(`${this.baseUrl}/watch/${id}`);
-                console.log($);
-                console.log("gay");
                 const episodeSources = {
                     sources: [
                         {

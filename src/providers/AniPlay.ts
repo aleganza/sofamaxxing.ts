@@ -134,6 +134,7 @@ class AniPlay extends Provider {
           quality: el.quality,
           isM3U8: true,
         })),
+        subtitles: []
       };
 
       data.subtitles?.map((el: any) => {
