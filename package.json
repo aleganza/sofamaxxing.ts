@@ -1,0 +1,25 @@
+{
+  "name": "sofamaxxing-scraper",
+  "version": "1.0.0",
+  "description": "Scraper for sofamaxxing",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@consumet/extensions": "github:consumet/consumet.ts",
+    "axios": "^1.7.9",
+    "react-native-cheerio": "^1.0.0-rc.4",
+    "scraper": "file:",
+    "sofamaxxing-scraper": "file:"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2"
+  }
+}
