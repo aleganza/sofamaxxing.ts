@@ -38,9 +38,9 @@ class AnimeParadise extends Provider {
         results: [],
       };
 
-      $(".style_container__EkpBD").each((_: any, el: any) => {
+      $(".style_container__EkpBD a").each((_: any, el: any) => {
         searchResult.results.push({
-          id: $(el).find("a").attr("href").split("/anime/")[1].trim(),
+          id: $(el).attr("href").split("/anime/")[1].trim(),
           title: $(el).find(".style_title__z1PLj").text().trim(),
           image: $(el).find("img").attr("src"),
         });
