@@ -112,12 +112,35 @@ class AniPlay extends Provider {
     type: "sub" | "dub" = "sub"
   ): Promise<UnifiedSources> {
     try {
-      // f3422af67c84852f5e63d50e1f51718f1c0225c4
       const [anilistId, ep] = id.split("?ep=");
+
+      const providersRes = await this.httpClient.post(
+        `${this.baseUrl}/anime/info/${anilistId}`,
+        JSON.stringify([anilistId, false, false]),
+        {
+          headers: {
+            "Next-Action": "f3422af67c84852f5e63d50e1f51718f1c0225c4",
+            "Content-Type": "text/plain",
+          },
+        }
+      );
+
+      const pData = JSON.parse((providersRes.data as string).split("1:")[1]);
+      const animeId = (() => {
+        if (!Array.isArray(pData)) return null;
+
+        const provider = pData.find((p: any) => p?.providerId === host);
+        if (!provider || !Array.isArray(provider.episodes)) return null;
+
+        const episode = provider.episodes[ep];
+        if (!episode || typeof episode.id === "undefined") return null;
+
+        return episode.id;
+      })();
 
       const sourcesRes = await this.httpClient.post(
         `${this.baseUrl}/anime/watch/${id}&host=${host}&type=${type}`,
-        JSON.stringify([anilistId, host, null, ep, type]),
+        JSON.stringify([anilistId, host, animeId, ep, type]),
         {
           headers: {
             "Next-Action": "5dbcd21c7c276c4d15f8de29d9ef27aef5ea4a5e",
@@ -134,7 +157,7 @@ class AniPlay extends Provider {
           quality: el.quality,
           isM3U8: true,
         })),
-        subtitles: []
+        subtitles: [],
       };
 
       data.subtitles?.map((el: any) => {
