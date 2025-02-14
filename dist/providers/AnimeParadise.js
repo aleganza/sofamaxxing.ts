@@ -92,10 +92,11 @@ class AnimeParadise extends provider_1.default {
                             isM3U8: episode.streamLink.includes("m3u8"),
                         },
                     ],
-                    subtitles: episode.subData.map((el) => ({
+                    subtitles: episode.subData
+                        .filter((el) => el.type === "vtt")
+                        .map((el) => ({
                         url: el.src,
                         lang: el.label,
-                        type: el.type,
                     })),
                 };
                 const m3u8Content = (yield this.httpClient.get(episode.streamLink));

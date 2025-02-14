@@ -4,13 +4,12 @@ test("crawl", async () => {
   const api = new AnimeParadise();
 
   const search = await api.search("spy");
-  console.log(search)
-  // const id = search.results[0].id;
+  const id = search.results[0].id;
 
-  // const info = await api.fetchInfo(id);
-  // const episodeId = info.episodes ? info.episodes[5].id : "";
+  const info = await api.fetchInfo(id);
+  const episodeId = info.episodes ? info.episodes[5].id : "";
 
-  // const sources = await api.fetchSources(episodeId);
+  const sources = await api.fetchSources(episodeId);
 
-  // console.log(sources);
+  console.log(sources);
 }, 20000);
