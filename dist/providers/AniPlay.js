@@ -101,9 +101,11 @@ class AniPlay extends provider_1.default {
         });
     }
     fetchSources(id_1) {
-        return __awaiter(this, arguments, void 0, function* (id, host = "yuki", type = "sub") {
+        return __awaiter(this, arguments, void 0, function* (id, host = "yuki", type = "sub", proxy = false // unstable, use only when you know you absolutely need one
+        ) {
             var _a, _b;
             try {
+                // https://aniplay-cors.yqizw7.easypanel.host/fetch?url=https://anime-eu.1stkmgv1.com/anime/2024/01/20/playlist_65ab49d30508f-1705724371_.m3u8&ref=https://animez.org
                 const [anilistId, ep] = id.split("?ep=");
                 const providersRes = yield this.httpClient.post(`${this.baseUrl}/anime/info/${anilistId}`, JSON.stringify([anilistId, false, false]), {
                     headers: {
@@ -134,7 +136,9 @@ class AniPlay extends provider_1.default {
                     throw new Error("Episode not available");
                 const episodeSources = {
                     sources: (_a = data.sources) === null || _a === void 0 ? void 0 : _a.map((el) => ({
-                        url: el.url,
+                        url: proxy
+                            ? `https://aniplay-cors.yqizw7.easypanel.host/fetch?url=${el.url}&ref=${data.headers.Referer}`
+                            : el.url,
                         quality: el.quality,
                         isM3U8: true,
                     })),

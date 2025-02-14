@@ -9,6 +9,6 @@ test("crawl", async () => {
   const info = await api.fetchInfo(id);
   const episodeId = info.episodes ? info.episodes[0].id : "";
 
-  const sources = await api.fetchSources(episodeId, "yuki");
+  const sources = await api.fetchSources(episodeId, "pahe", undefined, true);
   console.log(sources);
 });

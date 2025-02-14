@@ -109,9 +109,12 @@ class AniPlay extends Provider {
   async fetchSources(
     id: string,
     host: "maze" | "pahe" | "yuki" = "yuki",
-    type: "sub" | "dub" = "sub"
+    type: "sub" | "dub" = "sub",
+    proxy: boolean = false // unstable, use only when you know you absolutely need one
   ): Promise<UnifiedSources> {
     try {
+      // https://aniplay-cors.yqizw7.easypanel.host/fetch?url=https://anime-eu.1stkmgv1.com/anime/2024/01/20/playlist_65ab49d30508f-1705724371_.m3u8&ref=https://animez.org
+
       const [anilistId, ep] = id.split("?ep=");
 
       const providersRes = await this.httpClient.post(
@@ -153,7 +156,9 @@ class AniPlay extends Provider {
 
       const episodeSources: Sources = {
         sources: data.sources?.map((el: any) => ({
-          url: el.url,
+          url: proxy
+            ? `https://aniplay-cors.yqizw7.easypanel.host/fetch?url=${el.url}&ref=${data.headers.Referer}`
+            : el.url,
           quality: el.quality,
           isM3U8: true,
         })),

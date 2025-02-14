@@ -13,7 +13,7 @@ declare class AniPlay extends Provider {
     search(query: string): Promise<Search<MediaResult>>;
     private getDetailFromText;
     fetchInfo(id: string): Promise<UnifiedMediaInfo>;
-    fetchSources(id: string, host?: "maze" | "pahe" | "yuki", type?: "sub" | "dub"): Promise<UnifiedSources>;
+    fetchSources(id: string, host?: "maze" | "pahe" | "yuki", type?: "sub" | "dub", proxy?: boolean): Promise<UnifiedSources>;
 }
 export default AniPlay;
 //# sourceMappingURL=AniPlay.d.ts.map
