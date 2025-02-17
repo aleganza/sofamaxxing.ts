@@ -84,7 +84,7 @@ class StreamingCommunity extends Provider {
         seasons:
           data.title.seasons.map((el: any): MediaSeason => {
             return {
-              id: el.id,
+              id: el.id.toString(),
               number: el.number,
               title: el.name ?? undefined,
               description: el.plot ?? undefined,

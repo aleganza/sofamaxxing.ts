@@ -48,7 +48,7 @@ class StreamingCommunity extends provider_1.default {
                     seasons: (_e = data.title.seasons.map((el) => {
                         var _a, _b, _c;
                         return {
-                            id: el.id,
+                            id: el.id.toString(),
                             number: el.number,
                             title: (_a = el.name) !== null && _a !== void 0 ? _a : undefined,
                             description: (_b = el.plot) !== null && _b !== void 0 ? _b : undefined,

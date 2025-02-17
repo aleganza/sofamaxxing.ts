@@ -31,14 +31,6 @@ export interface FuzzyDate {
     month?: number;
     day?: number;
 }
-export interface MediaSeason {
-    id: number;
-    number: number;
-    title?: string;
-    description?: string;
-    releaseDate?: FuzzyDate;
-    totalEpisodes?: number;
-}
 export interface Subtitle {
     url: string;
     lang: string;
@@ -73,6 +65,14 @@ export interface MediaEpisode {
     runtime?: string;
     [x: string]: unknown;
 }
+export interface MediaSeason {
+    id: string;
+    number: number;
+    title?: string;
+    description?: string;
+    releaseDate?: FuzzyDate;
+    totalEpisodes?: number;
+}
 export interface Search<T> {
     currentPage?: number;
     hasNextPage?: boolean;
@@ -105,6 +105,7 @@ export interface MediaInfo extends MediaResult {
     banner?: string;
     season?: string;
     episodes?: MediaEpisode[];
+    seasons?: MediaSeason[];
     [x: string]: unknown;
 }
 export interface Sources {

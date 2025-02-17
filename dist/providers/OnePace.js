@@ -19,7 +19,7 @@ class OnePace extends custom_provider_1.default {
     constructor(customBaseURL) {
         super();
         this.name = "OnePace";
-        this.baseUrl = "https://pixeldrain.com";
+        this.baseUrl = "https://pixeldra.in";
         this.onePaceUrl = "https://www.onepace.net";
         this.languages = [
             "en",
@@ -37,72 +37,84 @@ class OnePace extends custom_provider_1.default {
         this.logo = `${this.onePaceUrl}/favicon.ico`;
         this.forRN = true;
         this.custom = false;
-        this.fetchList = (...args_1) => __awaiter(this, [...args_1], void 0, function* (lang = "en") {
-            try {
-                const res = yield axios_1.default.get(`${this.onePaceUrl}/${lang}/watch`);
-                const $ = cheerio.load(res.data);
-                const list = $("ol li.scroll-my-6")
-                    .toArray()
-                    .map((el) => ({
-                    title: $(el).find("h2").text().trim(),
-                    formats: $(el)
-                        .find("ul li.flex")
-                        .toArray()
-                        .map((elF) => ({
-                        title: $(elF).find("h3 span").text().trim(),
-                        links: $(elF)
-                            .find("ol li")
-                            .toArray()
-                            .map((elL) => ({
-                            id: `l/${$(elL).find("a").attr("href").split("/l/")[1].split("#item")[0]}`,
-                            quality: $(elL).find("a span").eq(1).text().trim(),
-                        })),
-                    })),
-                }));
-                return list;
-            }
-            catch (err) {
-                throw new Error(err.message);
-            }
-        });
-        this.fetchArc = (arcId) => __awaiter(this, void 0, void 0, function* () {
-            try {
-                const res = yield axios_1.default.get(`${this.baseUrl}/${arcId}`);
-                const $ = cheerio.load(res.data);
-                const data = JSON.parse($("script")
-                    .html()
-                    .toString()
-                    .split("window.viewer_data = ")[1]
-                    .split("window.user_authenticated")[0]
-                    .trim()
-                    .replace(/;$/, "")).api_response;
-                return {
-                    id: data.id,
-                    title: data.title,
-                    totalEpisodes: data.file_count,
-                    episodes: data.files.map((el, index) => ({
-                        id: el.id,
-                        title: el.name.replace(".mp4", ""), // 💅
-                        source: `${this.baseUrl}/api/file/${el.id}`,
-                        number: index + 1,
-                        description: el.description,
-                        size: el.size,
-                        type: el.mime_type,
-                        thumbnail: `${this.baseUrl}/api${el.thumbnail_href}`,
-                    })),
-                };
-            }
-            catch (err) {
-                throw new Error(err.message);
-            }
-        });
-        this.fetchSource = (arcId) => `${this.baseUrl}/api/file/${arcId}`;
         if (customBaseURL) {
             if (!customBaseURL.startsWith("https://")) {
                 throw new Error(`Invalid URL: "${customBaseURL}". The base URL must start with "https://".`);
             }
             this.baseUrl = customBaseURL;
         }
+    }
+    search(query) {
+        throw new Error("Method not implemented.");
+    }
+    fetchInfo() {
+        return __awaiter(this, arguments, void 0, function* (
+        // lang: (typeof this.languages)[number] = "en",
+        season = 1, dubbed = false) {
+            const lang = "en";
+            const res = yield axios_1.default.get(`${this.onePaceUrl}/${lang}/watch`);
+            const $ = cheerio.load(res.data);
+            const totalSeasons = $("ol li.scroll-my-6").toArray().length;
+            const result = {
+                id: "onepace",
+                hasSeasons: true,
+                title: "One Pace",
+                totalSeasons,
+                seasons: $("ol li.scroll-my-6")
+                    .toArray()
+                    .map((el, index) => {
+                    const format = $("ul li.flex")
+                        .toArray()
+                        .filter((el) => $(el).find("h3 span").text().trim() ===
+                        (dubbed ? "English Dub" : "English Subtitles"));
+                    const links = $(el)
+                        .find("ul li.flex ol li")
+                        .toArray()
+                        .map((elL) => ({
+                        id: `l/${$(elL).find("a").attr("href").split("/l/")[1].split("#item")[0]}`,
+                        quality: $(elL).find("a span").eq(1).text().trim(),
+                    }));
+                    const qualityOrder = { "1080p": 3, "720p": 2, "480p": 1 };
+                    const bestLink = links
+                        .sort((a, b) => (qualityOrder[b.quality] || 0) - (qualityOrder[a.quality] || 0))
+                        .at(0);
+                    return {
+                        id: bestLink.id,
+                        number: index + 1,
+                        title: `${$(el).find("h2").text().trim()} (${bestLink.quality})`,
+                    };
+                }),
+            };
+            if (season < 1 || season > totalSeasons)
+                throw new Error(`Argument 'season' must be between 1 and ${totalSeasons}! (You passed ${season})`);
+            const res2 = yield axios_1.default.get(`${this.baseUrl}/${result.seasons[season - 1].id}`);
+            const $2 = cheerio.load(res2.data);
+            const data = JSON.parse($2("script")
+                .html()
+                .toString()
+                .split("window.viewer_data = ")[1]
+                .split("window.user_authenticated")[0]
+                .trim()
+                .replace(/;$/, "")).api_response;
+            result.episodes = data.files.map((el, index) => ({
+                id: el.id,
+                number: index + 1,
+                title: el.name.replace(".mp4", "").split("Pace]")[1].split("[En")[0], // 💅
+                description: el.description,
+                image: `${this.baseUrl}/api${el.thumbnail_href}`,
+            }));
+            return result;
+        });
+    }
+    fetchSources(id) {
+        return {
+            sources: [
+                {
+                    url: `${this.baseUrl}/api/file/${id}`,
+                    quality: "default",
+                },
+            ],
+        };
     }
 }
 exports.default = OnePace;

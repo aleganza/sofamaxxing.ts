@@ -1,39 +1,19 @@
 import axios from "axios";
 
 import CustomProvider from "../models/custom-provider";
+import {
+  UnifiedSearch,
+  UnifiedMediaResult,
+  UnifiedMediaInfo,
+  UnifiedSources,
+} from "src/models/unifiedTypes";
+import { MediaInfo, MediaSeason } from "src/models/types";
 
 const cheerio = require("react-native-cheerio");
 
-export type OnePaceList = Array<{
-  title: string;
-  formats: Array<{
-    title: string;
-    links: Array<{
-      id: string;
-      quality: string;
-    }>;
-  }>;
-}>;
-
-export interface OnePaceArc {
-  id: string;
-  title: string;
-  totalEpisodes: number;
-  episodes: Array<{
-    id: string;
-    title: string;
-    source: string;
-    number: number;
-    description: string;
-    size: number; // in Bytes
-    type: string;
-    thumbnail: string;
-  }>;
-}
-
 class OnePace extends CustomProvider {
   override readonly name = "OnePace";
-  override baseUrl = "https://pixeldrain.com";
+  override baseUrl = "https://pixeldra.in";
   private onePaceUrl = "https://www.onepace.net";
   languages: string[] = [
     "en",
@@ -64,74 +44,105 @@ class OnePace extends CustomProvider {
     }
   }
 
-  fetchList = async (
-    lang: (typeof this.languages)[number] = "en"
-  ): Promise<OnePaceList> => {
-    try {
-      const res = await axios.get(`${this.onePaceUrl}/${lang}/watch`);
-      const $ = cheerio.load(res.data);
+  search(query: string): Promise<UnifiedSearch<UnifiedMediaResult>> {
+    throw new Error("Method not implemented.");
+  }
 
-      const list: OnePaceList = $("ol li.scroll-my-6")
+  async fetchInfo(
+    // lang: (typeof this.languages)[number] = "en",
+    season: number = 1,
+    dubbed: boolean = false
+  ): Promise<UnifiedMediaInfo> {
+    const lang = "en";
+    const res = await axios.get(`${this.onePaceUrl}/${lang}/watch`);
+    const $ = cheerio.load(res.data);
+
+    const totalSeasons = $("ol li.scroll-my-6").toArray().length;
+
+    const result: MediaInfo = {
+      id: "onepace",
+      hasSeasons: true,
+      title: "One Pace",
+      totalSeasons,
+      seasons: $("ol li.scroll-my-6")
         .toArray()
-        .map((el: any) => ({
-          title: $(el).find("h2").text().trim(),
-          formats: $(el)
-            .find("ul li.flex")
+        .map((el: any, index: number): MediaSeason => {
+          const format = $("ul li.flex")
             .toArray()
-            .map((elF: any) => ({
-              title: $(elF).find("h3 span").text().trim(),
-              links: $(elF)
-                .find("ol li")
-                .toArray()
-                .map((elL: any) => ({
-                  id: `l/${$(elL).find("a").attr("href").split("/l/")[1].split("#item")[0]}`,
-                  quality: $(elL).find("a span").eq(1).text().trim(),
-                })),
-            })),
-        }));
+            .filter(
+              (el: any) =>
+                $(el).find("h3 span").text().trim() ===
+                (dubbed ? "English Dub" : "English Subtitles")
+            );
 
-      return list;
-    } catch (err) {
-      throw new Error((err as Error).message);
-    }
-  };
+          const links = $(el)
+            .find("ul li.flex ol li")
+            .toArray()
+            .map((elL: any) => ({
+              id: `l/${$(elL).find("a").attr("href").split("/l/")[1].split("#item")[0]}`,
+              quality: $(elL).find("a span").eq(1).text().trim(),
+            }));
 
-  fetchArc = async (arcId: string): Promise<OnePaceArc> => {
-    try {
-      const res = await axios.get(`${this.baseUrl}/${arcId}`);
-      const $ = cheerio.load(res.data);
+          const qualityOrder: any = { "1080p": 3, "720p": 2, "480p": 1 };
+          const bestLink = links
+            .sort(
+              (
+                a: { quality: string | number },
+                b: { quality: string | number }
+              ) =>
+                (qualityOrder[b.quality] || 0) - (qualityOrder[a.quality] || 0)
+            )
+            .at(0);
 
-      const data = JSON.parse(
-        $("script")
-          .html()
-          .toString()
-          .split("window.viewer_data = ")[1]
-          .split("window.user_authenticated")[0]
-          .trim()
-          .replace(/;$/, "")
-      ).api_response;
+          return {
+            id: bestLink.id,
+            number: index + 1,
+            title: `${$(el).find("h2").text().trim()} (${bestLink.quality})`,
+          };
+        }),
+    };
 
-      return {
-        id: data.id,
-        title: data.title,
-        totalEpisodes: data.file_count,
-        episodes: data.files.map((el: any, index: number) => ({
-          id: el.id,
-          title: el.name.replace(".mp4", ""), // 💅
-          source: `${this.baseUrl}/api/file/${el.id}`,
-          number: index + 1,
-          description: el.description,
-          size: el.size,
-          type: el.mime_type,
-          thumbnail: `${this.baseUrl}/api${el.thumbnail_href}`,
-        })),
-      };
-    } catch (err) {
-      throw new Error((err as Error).message);
-    }
-  };
+    if (season < 1 || season > totalSeasons)
+      throw new Error(
+        `Argument 'season' must be between 1 and ${totalSeasons}! (You passed ${season})`
+      );
 
-  fetchSource = (arcId: string): string => `${this.baseUrl}/api/file/${arcId}`;
+    const res2 = await axios.get(
+      `${this.baseUrl}/${result.seasons![season - 1].id}`
+    );
+    const $2 = cheerio.load(res2.data);
+
+    const data = JSON.parse(
+      $2("script")
+        .html()
+        .toString()
+        .split("window.viewer_data = ")[1]
+        .split("window.user_authenticated")[0]
+        .trim()
+        .replace(/;$/, "")
+    ).api_response;
+
+    result.episodes = data.files.map((el: any, index: number) => ({
+      id: el.id,
+      number: index + 1,
+      title: el.name.replace(".mp4", "").split("Pace]")[1].split("[En")[0], // 💅
+      description: el.description,
+      image: `${this.baseUrl}/api${el.thumbnail_href}`,
+    }));
+
+    return result;
+  }
+
+  fetchSources(id: string): UnifiedSources {
+    return {
+      sources: [
+        {
+          url: `${this.baseUrl}/api/file/${id}`,
+          quality: "default",
+        },
+      ],
+    };
+  }
 }
 
 export default OnePace;

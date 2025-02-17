@@ -8,17 +8,17 @@ import {
 } from "./unifiedTypes";
 
 abstract class Provider extends ProviderBuilder {
-  abstract search?(
+  abstract search(
     query: string,
     ...args: any
   ): Promise<UnifiedSearch<UnifiedMediaResult>>;
 
-  abstract fetchInfo?(
+  abstract fetchInfo(
     id: string | number,
     ...args: any
   ): Promise<UnifiedMediaInfo>;
 
-  abstract fetchSources?(
+  abstract fetchSources(
     id: string | number,
     ...args: any
   ): Promise<UnifiedSources>;
